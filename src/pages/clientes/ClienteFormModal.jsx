@@ -15,86 +15,126 @@ function ClienteFormModal({
     });
   };
 
+  const inputClass =
+    "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition-all duration-200 placeholder:text-slate-400 focus:border-[#556B2F] focus:ring-2 focus:ring-[#556B2F]/10";
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 border border-neutral-100 transform transition-all">
-        <h2 className="text-2xl font-extrabold text-[#636B2F] tracking-tight mb-1">{titulo}</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-xl">
+        
+        {/* HEADER */}
+        <div className="px-6 pt-6 pb-4 border-b border-slate-100">
+          <h2 className="text-xl font-semibold text-slate-900">
+            {titulo}
+          </h2>
 
-        <p className="text-sm text-neutral-500 mb-6 font-medium">
-          Todos los campos son obligatorios.
-        </p>
+          <p className="mt-1 text-sm text-slate-500">
+            Completa la información del cliente.
+          </p>
+        </div>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm font-medium border border-red-100">
-            {error}
-          </div>
-        )}
+        {/* BODY */}
+        <div className="px-6 py-5">
+          {error && (
+            <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <input
-            name="nombre"
-            value={formCliente.nombre}
-            onChange={manejarCambio}
-            placeholder="Nombre"
-            required
-            className="w-full border border-neutral-200 bg-neutral-50 rounded-xl px-4 py-3 outline-none focus:border-[#636B2F] focus:ring-1 focus:ring-[#636B2F] focus:bg-white transition-all text-sm text-neutral-700 placeholder:text-neutral-400"
-          />
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">
+                  Nombre
+                </label>
+                <input
+                  name="nombre"
+                  value={formCliente.nombre}
+                  onChange={manejarCambio}
+                  placeholder="Ej: Ana"
+                  required
+                  className={inputClass}
+                />
+              </div>
 
-          <input
-            name="apellido"
-            value={formCliente.apellido}
-            onChange={manejarCambio}
-            placeholder="Apellido"
-            required
-            className="w-full border border-neutral-200 bg-neutral-50 rounded-xl px-4 py-3 outline-none focus:border-[#636B2F] focus:ring-1 focus:ring-[#636B2F] focus:bg-white transition-all text-sm text-neutral-700 placeholder:text-neutral-400"
-          />
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-500">
+                  Apellido
+                </label>
+                <input
+                  name="apellido"
+                  value={formCliente.apellido}
+                  onChange={manejarCambio}
+                  placeholder="Ej: Pérez"
+                  required
+                  className={inputClass}
+                />
+              </div>
+            </div>
 
-          <input
-            name="telefono"
-            value={formCliente.telefono}
-            onChange={manejarCambio}
-            placeholder="Teléfono - 10 dígitos"
-            required
-            maxLength="10"
-            className="w-full border border-neutral-200 bg-neutral-50 rounded-xl px-4 py-3 outline-none focus:border-[#636B2F] focus:ring-1 focus:ring-[#636B2F] focus:bg-white transition-all text-sm text-neutral-700 placeholder:text-neutral-400"
-          />
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-500">
+                Teléfono
+              </label>
+              <input
+                name="telefono"
+                value={formCliente.telefono}
+                onChange={manejarCambio}
+                placeholder="0999999999"
+                required
+                maxLength="10"
+                className={inputClass}
+              />
+            </div>
 
-          <input
-            name="direccion"
-            value={formCliente.direccion}
-            onChange={manejarCambio}
-            placeholder="Dirección"
-            required
-            className="w-full border border-neutral-200 bg-neutral-50 rounded-xl px-4 py-3 outline-none focus:border-[#636B2F] focus:ring-1 focus:ring-[#636B2F] focus:bg-white transition-all text-sm text-neutral-700 placeholder:text-neutral-400"
-          />
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-500">
+                Dirección
+              </label>
+              <input
+                name="direccion"
+                value={formCliente.direccion}
+                onChange={manejarCambio}
+                placeholder="Ej: Av. Principal y Bolívar"
+                required
+                className={inputClass}
+              />
+            </div>
 
-          <input
-            type="email"
-            name="correo"
-            value={formCliente.correo}
-            onChange={manejarCambio}
-            placeholder="Correo"
-            required
-            className="w-full border border-neutral-200 bg-neutral-50 rounded-xl px-4 py-3 outline-none focus:border-[#636B2F] focus:ring-1 focus:ring-[#636B2F] focus:bg-white transition-all text-sm text-neutral-700 placeholder:text-neutral-400"
-          />
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-500">
+                Correo electrónico
+              </label>
+              <input
+                type="email"
+                name="correo"
+                value={formCliente.correo}
+                onChange={manejarCambio}
+                placeholder="cliente@email.com"
+                required
+                className={inputClass}
+              />
+            </div>
 
-          <div className="flex justify-end gap-3 pt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2.5 rounded-xl text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 font-medium transition-colors"
-            >
-              Cancelar
-            </button>
+            {/* BOTONES */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-5">
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+              >
+                Cancelar
+              </button>
 
-            <button
-              type="submit"
-              className="px-6 py-2.5 rounded-xl bg-[#636B2F] text-white hover:bg-[#4f5625] font-medium shadow-sm transition-colors"
-            >
-              Guardar
-            </button>
-          </div>
-        </form>
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-[#556B2F] px-5 py-3 text-sm font-semibold text-white hover:bg-[#445622] transition shadow-sm"
+              >
+                Guardar
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

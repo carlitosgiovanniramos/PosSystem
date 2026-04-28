@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   buscarProductos,
   crearProducto,
@@ -33,9 +33,6 @@ function ProductosPage() {
 
   const tamanio = 5;
 
-  // ------------------------------
-  // CARGAR PRODUCTOS
-  // ------------------------------
   const cargarProductos = async () => {
     try {
       const response = await buscarProductos(texto, pagina, tamanio);
@@ -47,10 +44,7 @@ function ProductosPage() {
   };
 
   useEffect(() => {
-    const fetch = async () => {
-      await cargarProductos();
-    };
-    fetch();
+    cargarProductos();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagina]);
 
@@ -62,9 +56,6 @@ function ProductosPage() {
     }
   };
 
-  // ------------------------------
-  // CREAR
-  // ------------------------------
   const abrirModalNuevo = () => {
     setModoEdicion(false);
     setErrorModal("");
@@ -97,9 +88,6 @@ function ProductosPage() {
     }
   };
 
-  // ------------------------------
-  // EDITAR
-  // ------------------------------
   const abrirModalEditar = (producto) => {
     setModoEdicion(true);
     setProductoEditandoId(producto.id);
@@ -137,9 +125,6 @@ function ProductosPage() {
     }
   };
 
-  // ------------------------------
-  // ELIMINAR
-  // ------------------------------
   const abrirModalEliminar = (producto) => {
     setProductoEliminar(producto);
     setErrorEliminar("");
@@ -164,7 +149,6 @@ function ProductosPage() {
     }
   };
 
-  // ------------------------------
   const cerrarModal = () => {
     setMostrarModal(false);
     setModoEdicion(false);
@@ -174,60 +158,116 @@ function ProductosPage() {
 
   const totalPaginas = Math.ceil(total / tamanio);
 
-  // ------------------------------
+  const kpis = useMemo(() => {
+    const valorInventario = productos.reduce(
+      (acc, producto) =>
+        acc + Number(producto.precio || 0) * Number(producto.stock || 0),
+      0
+    );
+
+    const stockTotal = productos.reduce(
+      (acc, producto) => acc + Number(producto.stock || 0),
+      0
+    );
+
+    const bajoStock = productos.filter(
+      (producto) => Number(producto.stock || 0) <= 5
+    ).length;
+
+    return {
+      valorInventario,
+      stockTotal,
+      bajoStock,
+    };
+  }, [productos]);
+
   return (
-    <div className="min-h-screen bg-neutral-50 p-6 md:p-10 font-sans text-neutral-800">
-      <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-sm border border-neutral-100 p-8">
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-extrabold text-[#636B2F] tracking-tight">
-              Productos...
-            </h1>
-            <p className="text-neutral-500 mt-1 text-sm">
-              Gestión y control de tu inventario
-            </p>
+    <div className="min-h-screen bg-[#f4f6f2] p-6 md:p-10 text-slate-800">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-7 space-y-6">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#556B2F] mb-2">
+                Módulo de inventario
+              </p>
+
+              <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+                Productos
+              </h1>
+
+              <p className="text-slate-500 mt-1 text-sm">
+                Gestión y control de productos, precios y stock
+              </p>
+            </div>
+
+            <button
+              onClick={abrirModalNuevo}
+              className="bg-[#556B2F] hover:bg-[#445622] text-white rounded-2xl px-5 py-3 font-semibold shadow-sm transition-all duration-200 active:scale-[0.98]"
+            >
+              Nuevo producto
+            </button>
           </div>
 
-          <button
-            onClick={abrirModalNuevo}
-            className="bg-[#636B2F] hover:bg-[#4f5625] text-white px-5 py-2.5 rounded-xl shadow-sm transition-all duration-200 font-medium flex items-center gap-2"
-          >
-            Nuevo producto
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <p className="text-sm text-slate-500">Total productos</p>
+              <h3 className="text-2xl font-bold text-slate-900 mt-1">
+                {total}
+              </h3>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <p className="text-sm text-slate-500">Stock visible</p>
+              <h3 className="text-2xl font-bold text-slate-900 mt-1">
+                {kpis.stockTotal}
+              </h3>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-[#556B2F]/5 p-5">
+              <p className="text-sm text-slate-500">Valor visible</p>
+              <h3 className="text-2xl font-bold text-[#556B2F] mt-1">
+                ${kpis.valorInventario.toFixed(2)}
+              </h3>
+            </div>
+          </div>
         </div>
 
-        {/* BUSCAR */}
-        <div className="flex gap-4 mb-8 bg-neutral-50 p-2 rounded-2xl border border-neutral-100">
-          <input
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            placeholder="Buscar producto..."
-            className="w-full bg-transparent px-4 py-2 outline-none text-neutral-700 placeholder:text-neutral-400"
-          />
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-5">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              value={texto}
+              onChange={(e) => setTexto(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") buscar();
+              }}
+              placeholder="Buscar producto por nombre..."
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition-all duration-200 placeholder:text-slate-400 focus:bg-white focus:border-[#556B2F] focus:ring-4 focus:ring-[#556B2F]/10"
+            />
 
-          <button
-            onClick={buscar}
-            className="bg-[#636B2F] hover:bg-[#4f5625] text-white px-5 py-2.5 rounded-xl shadow-sm transition-all duration-200 font-medium flex items-center gap-2"
-          >
-            Buscar
-          </button>
+            <button
+              onClick={buscar}
+              className="bg-[#556B2F] hover:bg-[#445622] text-white rounded-2xl px-6 py-3 text-sm font-semibold shadow-sm transition-all duration-200 active:scale-[0.98]"
+            >
+              Buscar
+            </button>
+          </div>
+
+          {kpis.bajoStock > 0 && (
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              Hay {kpis.bajoStock} producto(s) visibles con stock bajo.
+            </div>
+          )}
         </div>
 
-        {/* TABLA */}
-        <div className="overflow-x-auto rounded-2xl border border-neutral-100">
+        <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full border-collapse bg-white">
             <thead>
-              <tr className="bg-[#636B2F]/10 text-[#636B2F] border-b border-[#636B2F]/20 text-xs uppercase tracking-wider font-bold">
-                <th className="p-4 text-left font-semibold rounded-tl-2xl w-20">
-                  ID
-                </th>
-                <th className="p-4 text-left font-semibold">Nombre</th>
-                <th className="p-4 text-left font-semibold w-32">Precio</th>
-                <th className="p-4 text-left font-semibold w-32">Stock</th>
-                <th className="p-4 text-center font-semibold rounded-tr-2xl w-48">
-                  Acciones
-                </th>
+              <tr className="bg-slate-50 text-slate-500 uppercase text-xs tracking-wide">
+                <th className="p-4 text-left font-semibold">ID</th>
+                <th className="p-4 text-left font-semibold">Producto</th>
+                <th className="p-4 text-left font-semibold">Precio</th>
+                <th className="p-4 text-left font-semibold">Stock</th>
+                <th className="p-4 text-center font-semibold">Acciones</th>
               </tr>
             </thead>
 
@@ -235,23 +275,43 @@ function ProductosPage() {
               {productos.map((p) => (
                 <tr
                   key={p.id}
-                  className="border-b border-neutral-50 hover:bg-[#636B2F]/5 transition-colors text-sm text-neutral-600"
+                  className="border-b border-slate-100 hover:bg-[#556B2F]/5 transition-colors text-sm text-slate-700"
                 >
-                  <td className="p-4 font-medium text-neutral-800">{p.id}</td>
-                  <td className="p-4">{p.nombre}</td>
-                  <td className="p-4">${p.precio}</td>
-                  <td className="p-4">{p.stock}</td>
-                  <td className="p-4 text-center space-x-2">
+                  <td className="p-4 font-semibold text-slate-500">
+                    #{p.id}
+                  </td>
+
+                  <td className="p-4 font-medium text-slate-900">
+                    {p.nombre}
+                  </td>
+
+                  <td className="p-4 font-semibold text-slate-800">
+                    ${Number(p.precio || 0).toFixed(2)}
+                  </td>
+
+                  <td className="p-4">
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                        Number(p.stock) <= 5
+                          ? "bg-amber-50 text-amber-700 border border-amber-200"
+                          : "bg-slate-100 text-slate-700 border border-slate-200"
+                      }`}
+                    >
+                      {p.stock} unidades
+                    </span>
+                  </td>
+
+                  <td className="p-4 text-center space-x-2 whitespace-nowrap">
                     <button
                       onClick={() => abrirModalEditar(p)}
-                      className="text-[#636B2F] hover:text-[#4f5625] hover:bg-[#636B2F]/10 px-3 py-1.5 rounded-lg transition-colors font-medium"
+                      className="text-[#556B2F] hover:bg-[#556B2F]/10 px-3 py-1.5 rounded-xl transition-all duration-200 font-semibold"
                     >
                       Editar
                     </button>
 
                     <button
                       onClick={() => abrirModalEliminar(p)}
-                      className="text-olive-700 hover:text-white hover:bg-olive-700 px-3 py-1.5 rounded-lg transition-colors font-medium"
+                      className="text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-xl transition-all duration-200 font-semibold"
                     >
                       Eliminar
                     </button>
@@ -263,7 +323,7 @@ function ProductosPage() {
                 <tr>
                   <td
                     colSpan="5"
-                    className="p-8 text-center text-neutral-400 font-medium"
+                    className="py-10 px-6 text-center text-slate-500 font-medium"
                   >
                     No se encontraron productos
                   </td>
@@ -273,30 +333,29 @@ function ProductosPage() {
           </table>
         </div>
 
-        {/* PAGINACIÓN */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4 text-sm text-neutral-500">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm px-5 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-500">
           <p>
             Total registros:{" "}
-            <span className="font-semibold text-neutral-800">{total}</span>
+            <span className="font-semibold text-slate-900">{total}</span>
           </p>
 
           <div className="flex items-center gap-2">
             <button
               disabled={pagina === 1}
               onClick={() => setPagina(pagina - 1)}
-              className="px-4 py-2 rounded-xl border border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 disabled:opacity-40 disabled:hover:bg-transparent transition-all font-medium"
+              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Anterior
             </button>
 
-            <span className="px-4 py-2 font-medium text-neutral-700 bg-neutral-50 rounded-xl border border-neutral-100">
+            <span className="px-4 py-2 font-medium text-slate-700 bg-slate-50 rounded-xl border border-slate-200">
               Página {pagina} de {totalPaginas || 1}
             </span>
 
             <button
               disabled={pagina >= totalPaginas}
               onClick={() => setPagina(pagina + 1)}
-              className="px-4 py-2 rounded-xl border border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 disabled:opacity-40 disabled:hover:bg-transparent transition-all font-medium"
+              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Siguiente
             </button>
@@ -304,7 +363,6 @@ function ProductosPage() {
         </div>
       </div>
 
-      {/* MODAL FORM */}
       {mostrarModal && (
         <ProductoFormModal
           titulo={modoEdicion ? "Editar producto" : "Nuevo producto"}
@@ -316,7 +374,6 @@ function ProductosPage() {
         />
       )}
 
-      {/* MODAL DELETE */}
       {mostrarModalEliminar && productoEliminar && (
         <ProductoDeleteModal
           producto={productoEliminar}
